@@ -1,0 +1,53 @@
+
+<div class="container">
+  <h1>My Task Tracker</h1>
+  <p class="subtitle">Organize your day, one task at a time.</p>
+
+  <form (ngSubmit)="addTask()" class="task-form">
+    <input
+      type="text"
+      name="title"
+      [(ngModel)]="title"
+      placeholder="Enter task title"
+      required
+    />
+
+    <textarea
+      name="description"
+      [(ngModel)]="description"
+      placeholder="Enter task description"
+    ></textarea>
+
+    <button type="submit">Add Task</button>
+  </form>
+
+  <p *ngIf="loading">Loading tasks...</p>
+  <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+
+  <p *ngIf="!loading && tasks.length === 0">
+    No tasks yet. Add your first task!
+  </p>
+
+  <div class="task-card" *ngFor="let task of tasks">
+    <div class="task-details">
+      <h3 [class.completed]="task.completed">{{ task.title }}</h3>
+      <p>{{ task.description || 'No description' }}</p>
+      <span>{{ task.completed ? 'Completed' : 'Pending' }}</span>
+    </div>
+
+    <div class="task-actions">
+      <button type="button" (click)="toggleTask(task)">
+        {{ task.completed ? 'Mark Pending' : 'Complete' }}
+      </button>
+
+      <button
+        type="button"
+        class="delete-btn"
+        (click)="deleteTask(task)"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
