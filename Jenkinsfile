@@ -1,49 +1,50 @@
 
 pipeline {
-
     agent any
+
+    options {
+        skipDefaultCheckout(true)
+    }
 
     stages {
 
-        stage('Welcome') {
+        stage('Checkout') {
             steps {
-                echo 'Welcome to Jenkins Pipeline!'
-                echo 'Learning CI/CD Automation'
+                checkout scm
             }
         }
 
         stage('Environment Check') {
             steps {
-                sh 'whoami'
-                sh 'java -version'
-                sh 'git --version'
-                sh 'pwd'
+                sh 'node -v'
+                sh 'npm -v'
             }
         }
 
-        stage('Build') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Starting application build...'
-                echo 'Build stage completed!'
+                dir('backend') {
+                    sh 'npm install'
+                }
             }
         }
 
-        stage('Test') {
+        stage('Run Jest Tests') {
             steps {
-                echo 'Running application tests...'
-                echo 'Test stage completed!'
+                dir('backend') {
+                    sh 'npm test'
+                }
             }
         }
-
     }
 
     post {
         success {
-            echo 'Pipeline executed successfully!'
+            echo 'CI Pipeline Completed Successfully!'
         }
 
         failure {
-            echo 'Pipeline execution failed!'
+            echo 'CI Pipeline Failed. Check the console output.'
         }
     }
 }
