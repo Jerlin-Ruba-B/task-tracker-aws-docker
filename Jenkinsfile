@@ -18,6 +18,7 @@ pipeline {
             steps {
                 sh 'node -v'
                 sh 'npm -v'
+                sh 'docker --version'
             }
         }
 
@@ -36,15 +37,43 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Backend Docker Image') {
+            steps {
+                sh '''
+                    docker build \
+                    -t task-tracker-backend:${BUILD_NUMBER} \
+                    -t task-tracker-backend:latest \
+                    ./backend
+                '''
+            }
+        }
+
+        stage('Build Frontend Docker Image') {
+            steps {
+                sh '''
+                    docker build \
+                    -t task-tracker-frontend:${BUILD_NUMBER} \
+                    -t task-tracker-frontend:latest \
+                    ./frontend
+                '''
+            }
+        }
+
+        stage('Verify Docker Images') {
+            steps {
+                sh 'docker images'
+            }
+        }
     }
 
     post {
         success {
-            echo 'CI Pipeline Completed Successfully!'
+            echo 'CI Pipeline and Docker Image Builds Completed Successfully!'
         }
 
         failure {
-            echo 'CI Pipeline Failed. Check the console output.'
+            echo 'Pipeline Failed. Check the console output.'
         }
     }
 }
