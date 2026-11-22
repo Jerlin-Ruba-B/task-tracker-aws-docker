@@ -76,8 +76,8 @@ pipeline {
             steps {
                 sh '''
                     docker build \
-                    -t task-tracker-backend:${BUILD_NUMBER} \
-                    -t task-tracker-backend:latest \
+                    -t jerlinruba3010/task-tracker-backend:${BUILD_NUMBER} \
+                    -t jerlinruba3010/task-tracker-backend:latest \
                     ./backend
                 '''
             }
@@ -87,8 +87,8 @@ pipeline {
             steps {
                 sh '''
                     docker build \
-                    -t task-tracker-frontend:${BUILD_NUMBER} \
-                    -t task-tracker-frontend:latest \
+                    -t jerlinruba3010/task-tracker-frontend:${BUILD_NUMBER} \
+                    -t jerlinruba3010/task-tracker-frontend:latest \
                     ./frontend
                 '''
             }
@@ -99,6 +99,38 @@ pipeline {
                 sh 'docker images'
             }
         }
+
+
+        stage('Push Images to Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        set +x
+
+                        echo "$DOCKERHUB_PASSWORD" | docker login \
+                            -u "$DOCKERHUB_USERNAME" \
+                            --password-stdin
+
+                        trap 'docker logout' EXIT
+
+                        docker push jerlinruba3010/task-tracker-backend:${BUILD_NUMBER}
+                        docker push jerlinruba3010/task-tracker-backend:latest
+
+                        docker push jerlinruba3010/task-tracker-frontend:${BUILD_NUMBER}
+                        docker push jerlinruba3010/task-tracker-frontend:latest
+
+                        echo "Both images pushed successfully!"
+                    '''
+                }
+            }
+        }
+
     }
 
     post {
